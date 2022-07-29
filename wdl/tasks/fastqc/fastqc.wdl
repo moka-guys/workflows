@@ -21,9 +21,9 @@ task fastqc_v1_3 {
 
   runtime {
     dx_app: object {
-      type: "applet",
-      id: "applet-FBPFfkj0jy1Q114YGQ0yQX8Y",
-      name: "fastqc_v1.3"
-    }
+              type: "applet",
+              id: "applet-FBPFfkj0jy1Q114YGQ0yQX8Y",
+              name: "fastqc_v1.3"
+            }
   }
 }

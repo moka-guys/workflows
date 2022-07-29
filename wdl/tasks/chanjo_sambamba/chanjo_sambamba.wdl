@@ -25,9 +25,9 @@ task chanjo_sambamba_coverage_v1_13 {
 
   runtime {
     dx_app: object {
-      type: "applet",
-      id: "applet-G6vyyf00jy1kPkX9PJ1YkxB1",
-      name: "chanjo_sambamba_coverage_v1.13"
-    }
+              type: "applet",
+              id: "applet-G6vyyf00jy1kPkX9PJ1YkxB1",
+              name: "chanjo_sambamba_coverage_v1.13"
+            }
   }
 }

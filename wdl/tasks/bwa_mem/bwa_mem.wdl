@@ -24,10 +24,10 @@ task bwa_mem_fastq_read_mapper_v1_3 {
   }
 
   runtime {
-    dx_app: object {
-      type: "applet",
-      id: "applet-FBPv1QQ0jy1zZ3vX7jybPz9Q",
-      name: "bwa_mem_fastq_read_mapper_v1.3"
-    }
+      dx_app: object {
+                  type: "applet",
+                  id: "applet-FBPv1QQ0jy1zZ3vX7jybPz9Q",
+                  name: "bwa_mem_fastq_read_mapper_v1.3"
+              }
   }
 }

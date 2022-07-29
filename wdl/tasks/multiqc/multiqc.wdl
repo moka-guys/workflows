@@ -15,9 +15,9 @@ task multiqc_v1_15_0 {
 
   runtime {
     dx_app: object {
-      type: "applet",
-      id: "applet-G7QB6zj0jy1z1ZV1P5VZBj9p",
-      name: "multiqc_v1.15.0"
-    }
+              type: "applet",
+              id: "applet-G7QB6zj0jy1z1ZV1P5VZBj9p",
+              name: "multiqc_v1.15.0"
+            }
   }
 }

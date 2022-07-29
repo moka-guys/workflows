@@ -10,6 +10,7 @@ task rename_sample_in_vcf {
     }
     Int disk_gb = ceil((size(vcf, "GiB"))+ 4 + 10)
     command <<<
+        set -x
         mkdir -p ~{output_dir}/genotype && \
         gatk RenameSampleInVcf \
         INPUT=~{vcf} \

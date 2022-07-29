@@ -17,10 +17,15 @@ task MsiSensor2 {
             choices: ["hg19_GRCh37","b37_HumanG1Kv37","hg38"],
             default: "hg38"
         }
+        coverage_threshold:{
+            default: 20
+        }
     }
     String output_file = '~{sample_name}.tumor.prefix'
 
     command <<<
+        ls ~{input_bam_index}
+        set -x
         if [ ~{homopolymer_only} = true ] ; then
             homopolymer_parameter=1
         else

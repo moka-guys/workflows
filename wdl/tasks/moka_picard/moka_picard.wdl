@@ -1,10 +1,11 @@
 version 1.0
 
-task moka_picard_v1_1 {
+task moka_picard_v1_2 {
   input {
     File? sorted_bam
     File fasta_index
     File vendor_exome_bedfile
+    Boolean remove_chr
     String Capture_panel
   }
 
@@ -16,9 +17,9 @@ task moka_picard_v1_1 {
 
   runtime {
     dx_app: object {
-      type: "applet",
-      id: "applet-FPv2Q1Q0jy1pBk9bG7GZ5zQp",
-      name: "moka_picard_v1.1"
-    }
+              type: "applet",
+              id: "applet-G9yJ57j0jy1ZV0fxPZZXJ8FJ",
+              name: "moka_picard_v1.2"
+            }
   }
 }
