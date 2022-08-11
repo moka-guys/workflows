@@ -1,6 +1,6 @@
 version 1.0
 
-task Fastp {
+task fastp_v1_0 {
     input {
         String sample_name
         String output_dir
@@ -8,17 +8,16 @@ task Fastp {
         Int? min_disk_gb = 10
     }
     meta {
-        title: "fastpv1.0"
-        summary: "Uses fastp v0.21.0. This applet uses the swglh fastp docker image (swglh/fastp-tabix:0.21.0), which contains fastp v0.21.0 (https://github.com/OpenGene/fastp/commit/0da2f13ae21f440b6db8de83312db8b6e99d932c)"
-        description: "TEST"
+        title: "fastp_v1_0"
+        summary: "ADD HEADLINE SUMMARY HERE"
+        description: "ADD LONGER DESCRIPTION HERE"
         tags: ["TSO500", "WDL"]
         properties: {
-            app_github_release: "unreleased",
             runtime_docker_image: "swglh/fastp-tabix:0.21.0",
-            fastp_version: "v0.21.0"
+            applet_version: "v1_0",
+            release_status: "unreleased"
             }
-        }
-
+    }
     Int disk_gb = select_first([(ceil(2*size(fastq_files, "GiB")) + 20), min_disk_gb])
     command <<<
         set -x
@@ -46,9 +45,11 @@ task Fastp {
         File? trimmed_fastq_R2 = "${sample_name}.trimmed.R2.fastq.gz"
     }
     runtime {
+        # build from existing dockerfile and switch to using this
         docker: "swglh/fastp-tabix:0.21.0"
         memory: "4 GB"
         cpu: 2
         disks: "local-disk ${disk_gb} SSD"
+        continueOnReturnCode: true
     }
 }

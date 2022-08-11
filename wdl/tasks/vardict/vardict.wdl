@@ -1,6 +1,6 @@
 version 1.0
 
-task VarDict {
+task VarDict_v1_0 {
     input {
         String sampleName
         String output_dir
@@ -12,6 +12,17 @@ task VarDict {
         Int startColumn = 2
         Int endColumn = 3
         Int geneColumn = 4
+    }
+    meta {
+        title: "VarDict_v1_0"
+        summary: "ADD HEADLINE SUMMARY HERE"
+        description: "ADD LONGER DESCRIPTION HERE"
+        tags: ["TSO500", "WDL"]
+        properties: {
+            runtime_docker_image: "swglh/vardictjava:1.8",
+            applet_version: "v1_0",
+            release_status: "unreleased"
+            }
     }
     Int disk_gb = ceil(size(tumorBam, "GiB")+ size(reference, "GiB") + 20)
     command <<<
@@ -39,6 +50,7 @@ task VarDict {
         File? vardictVcf = "${sampleName}.vardictsingle.vcf"
     }
     runtime {
+        # build from existing dockerfile and switch to using this
         docker: "swglh/vardictjava:1.8"
         memory: "4 GB"
         cpu: 8

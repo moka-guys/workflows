@@ -1,6 +1,6 @@
 version 1.0
 
-task MsiSensor2 {
+task MsiSensor2_v1_0 {
     input {
         File? input_bam
         File? input_bam_index
@@ -10,19 +10,28 @@ task MsiSensor2 {
         Boolean? microsatellite_only = false
         String sample_name
     }
-
     parameter_meta {
-        model:{
-            help: "model",
-            choices: ["hg19_GRCh37","b37_HumanG1Kv37","hg38"],
-            default: "hg38"
-        }
-        coverage_threshold:{
-            default: 20
-        }
+        model: {
+                   help: "model",
+                   choices: ["hg19_GRCh37","b37_HumanG1Kv37","hg38"],
+                   default: "hg38"
+               }
+        coverage_threshold: {
+                                default: 20
+                            }
+    }
+    meta {
+        title: "MsiSensor2_v1_0"
+        summary: "ADD HEADLINE SUMMARY HERE"
+        description: "ADD LONGER DESCRIPTION HERE"
+        tags: ["TSO500", "WDL"]
+        properties: {
+                        runtime_docker_image: "dx://file-G60XzGj0jy5vbvjk9pV0kFKv",
+                        applet_version: "v1.0",
+                        release_status: "unreleased"
+                    }
     }
     String output_file = '~{sample_name}.tumor.prefix'
-
     command <<<
         ls ~{input_bam_index}
         set -x
@@ -46,18 +55,16 @@ task MsiSensor2 {
             -y ${microsatelite_parameter} \
             -o ~{output_file}
             true
-
     >>>
-
     output {
         File? output_report = "${output_file}"
         File? output_report_dis = "${output_file}_dis"
         File? output_report_somatic = "${output_file}_somatic"
-
     }
-
     runtime {
+        # build from existing dockerfile and switch to using this
         docker: "dx://file-G60XzGj0jy5vbvjk9pV0kFKv"
         dx_instance_type: "mem2_ssd1_v2_x16"
+        continueOnReturnCode: true
     }
 }

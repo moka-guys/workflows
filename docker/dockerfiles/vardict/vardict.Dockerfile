@@ -16,4 +16,3 @@ RUN cd VarDictJava/ && ./gradlew clean installDist && unzip dist/VarDict-$vardic
 ENV PATH="/VarDictJava/VarDict-$vardict_version/bin:${PATH}"
 
 ENV PATH=$PATH:/bin
-

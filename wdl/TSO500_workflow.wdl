@@ -7,19 +7,19 @@ import "tasks/fastqc/fastqc.wdl" as fastqc
 import "tasks/fastp/fastp.wdl" as fastp
 import "tasks/bwa_mem/bwa_mem.wdl" as bwa_mem
 import "tasks/umi_collapse/umi_collapse.wdl" as umi_collapse
+import "tasks/verify_bam_id/verify_bam_id.wdl" as verify_bam_id
 import "tasks/chanjo_sambamba/chanjo_sambamba.wdl" as chanjo_sambamba
 import "tasks/moka_picard/moka_picard.wdl" as moka_picard
 import "tasks/vardict/vardict.wdl" as vardict
 import "tasks/mutect2/mutect2.wdl" as mutect2
+import "tasks/GATK_FilterMutectCalls/GATK_FilterMutectCalls.wdl" as GATK_FilterMutectCalls
 import "tasks/msisensor2/msisensor2.wdl" as msisensor2
-import "tasks/combine_vcfs/combine_vcfs.wdl" as combine_vcfs
-#import "tasks/vt/vt.wdl" as vt
-#import "tasks/variant_filtration/variant_filtration.wdl" as variant_filtration_task
-#import "tasks/filter_vcf_with_bedfile/filter_vcf_with_bedfile.wdl" as filter_vcf_with_bedfile
+import "tasks/GATK_combine_VCFs/GATK_combine_vcfs.wdl" as GATK_combine_vcfs
+import "tasks/vtNormalize/vtNormalize.wdl" as vtNormalize
+import "tasks/vtDecompose/vtDecompose.wdl" as vtDecompose
 import "tasks/multiqc/multiqc.wdl" as multiqc
 
-
-workflow DNA_pipeline {
+workflow TSO500_workflow {
     meta {
         developer: "moka-guys/DNAnexus"
         date: "27/08/2021"
@@ -60,7 +60,7 @@ workflow DNA_pipeline {
             reads = sample.fastq_file_2
         }
         # Bristol app - FASTP - UMI extraction
-        call fastp.Fastp {
+        call fastp.fastp_v1_0 as fastp_v1_0 {
             input:
             output_dir = sample.output_dir,
             sample_name = sample.sample_name,
@@ -70,8 +70,8 @@ workflow DNA_pipeline {
         call bwa_mem.bwa_mem_fastq_read_mapper_v1_3 as bwa_mem_v1_3 {
             input:
             read_group_sample = sample.sample_name,
-            reads_fastqgz = Fastp.trimmed_fastq_R1,
-            reads2_fastqgz = Fastp.trimmed_fastq_R2,
+            reads_fastqgz = fastp_v1_0.trimmed_fastq_R1,
+            reads2_fastqgz = fastp_v1_0.trimmed_fastq_R2,
             genomeindex_targz = reference_bwa_index,
             add_read_group = add_read_group,
             read_group_id = sample.sample_name,
@@ -83,116 +83,100 @@ workflow DNA_pipeline {
             advanced_options = advanced_options
         }
         # Bristol app - UMICOLLAPSE - alignment collapse by UMI
-        call umi_collapse.UMICollapse as UMICollapse {
+        call umi_collapse.UMICollapse_v1_0 as UMICollapse_v1_0 {
             input:
             sample_name = sample.sample_name,
             precollapsed_bam = bwa_mem_v1_3.sorted_bam,
             precollapsed_bam_index = bwa_mem_v1_3.sorted_bai
         }
+        # VerifyBamID - contamination detection
+        call verify_bam_id.verify_bam_id_v1_1_1 as verify_bam_id_v1_1_1 {
+            input:
+                input_bam = UMICollapse_v1_0.final_bam,
+                input_bam_index = UMICollapse_v1_0.final_bam_index
+        }
         # calculate exon-level and gene-level coverage
-        call chanjo_sambamba.chanjo_sambamba_coverage_v1_13 as chanjo_sambamba {
+        call chanjo_sambamba.chanjo_sambamba_coverage_v1_13 as chanjo_sambamba_coverage_v1_13 {
             input:
             coverage_level = sambamba_coverage_level,
             sambamba_bed = coverage_bedfile,
-            bamfile = UMICollapse.final_bam,
-            bam_index = UMICollapse.final_bam_index
+            bamfile = UMICollapse_v1_0.final_bam,
+            bam_index = UMICollapse_v1_0.final_bam_index
         }
         # QC stats
         call moka_picard.moka_picard_v1_2 as moka_picard_v1_2 {
             input:
-            sorted_bam = UMICollapse.final_bam,
+            sorted_bam = UMICollapse_v1_0.final_bam,
             fasta_index = reference_fasta_index,
             vendor_exome_bedfile = bedfile,
             Capture_panel = Capture_panel,
             remove_chr = remove_chr
         }
         # Bristol app - ours is an old outdated version of vardict
-        call vardict.VarDict as varDict {
+        call vardict.VarDict_v1_0 as VarDict_v1_0 {
             input:
                 sampleName = sample.sample_name,
-                tumorBam = UMICollapse.final_bam,
-                tumorBamIndex = UMICollapse.final_bam_index,
+                tumorBam = UMICollapse_v1_0.final_bam,
+                tumorBamIndex = UMICollapse_v1_0.final_bam_index,
                 reference = reference_fasta_index,
                 bedFile = bedfile,
                 output_dir = sample.output_dir
         }
         # Bristol app
-        call mutect2.Mutect2 as mutect2 {
+        call mutect2.Mutect2_v1_0 as Mutect2_v1_0 {
             input:
                 sample_name = sample.sample_name,
                 output_dir = sample.output_dir,
                 reference = reference_fasta_index,
-                mappings_bam = UMICollapse.final_bam,
-                mappings_bai = UMICollapse.final_bam_index,
+                mappings_bam = UMICollapse_v1_0.final_bam,
+                mappings_bai = UMICollapse_v1_0.final_bam_index,
                 intervals = bedfile
         }
         # Bristol app
-        call mutect2.FilterCalls as mutect2_FilterCalls {
+        call GATK_FilterMutectCalls.GATK_FilterCalls_v1_0 as GATK_FilterCalls_v1_0 {
             input:
                 sample_name = sample.sample_name,
                 output_dir = sample.output_dir,
                 reference = reference_fasta_index,
                 intervals = bedfile,
-                unfiltered_vcf = mutect2.vcf,
-                stats = mutect2.stats
+                unfiltered_vcf = Mutect2_v1_0.vcf,
+                stats = Mutect2_v1_0.stats
         }
-#        # Dockerhub cnvkit image
-#        call cnvkit_parabricks.cnvkit_parabricks {
-#            input:
-#                mappings_bam = UMICollapse.final_bam,
-#                mappings_bai = UMICollapse.final_bam_index,
-#                reference_fasta = reference_fasta_index
-#            }
         # Bristol app - MSI Sensor 2 - CPU based
-        call msisensor2.MsiSensor2 as MsiSensor2 {
+        call msisensor2.MsiSensor2_v1_0 as MsiSensor2_v1_0 {
             input:
-                input_bam = UMICollapse.final_bam,
-                input_bam_index = UMICollapse.final_bam_index,
+                input_bam = UMICollapse_v1_0.final_bam,
+                input_bam_index = UMICollapse_v1_0.final_bam_index,
                 model = MSI_model,
                 coverage_threshold = MSI_coverage_threshold,
                 microsatellite_only = MSI_microsatellite_only,
                 sample_name = sample.sample_name
         }
         # Bristol app - combines vcfs from vardict and mutect2
-        call combine_vcfs.CombineVcfs as GATK_CombineVariants {
+        call GATK_combine_vcfs.GATK_CombineVCFs_v1_0 as GATK_CombineVCFs_v1_0 {
             input:
                 sample_name = sample.sample_name,
                 reference = reference_fasta_index,
-                vardict_vcf = varDict.vardictVcf,
-                mutect_vcf = mutect2_FilterCalls.vcf
+                vardict_vcf = VarDict_v1_0.vardictVcf,
+                mutect_vcf = GATK_FilterCalls_v1_0.vcf
         }
-#        # Bristol app - normalises variant representation in the vcf. Normalized variants may have their positions
-#        # changed; in such cases, the normalized variants are reordered and output in an ordered fashion
-#        call vt.vtNormalize as norm {
-#            input:
-#                sample_name = sample.sample_name,
-#                reference = reference_fasta_index,
-#                vcf = GATK_CombineVariants.combined_vcf
-#        }
-#        # Bristol app - decomposes multiallelic variants into biallelic variants
-#        call vt.vtDecompose as decomp {
-#            input:
-#                sample_name = sample.sample_name,
-#                vcf = norm.normalisedvcf
-#        }
-#        # Bristol app - Filter variant calls based on INFO and/or FORMAT annotations
-#        call variant_filtration_task.variant_filtration as filter_variants {
-#            input:
-#                sample_name = sample.sample_name,
-#                reference = reference_fasta_index,
-#                vcf = decomp.decomposedvcf
-#        }
-#        # Trim to panel
-#        call filter_vcf_with_bedfile.filter_vcf_with_bedfile as filter_with_bedfile {
-#            input:
-#                vcf_file = filter_variants.softfiltered_vcf
-#                vcf_index = ???
-#                bedfile = bedfile
-#        }
-
+        # Bristol app - normalises variant representation in the vcf. Normalized variants may have their positions
+        # changed; in such cases, the normalized variants are reordered and output in an ordered fashion
+        call vtNormalize.vtNormalize_v1_0 as vtNormalize_v1_0 {
+            input:
+                sample_name = sample.sample_name,
+                reference = reference_fasta_index,
+                vcf = GATK_CombineVCFs_v1_0.combined_vcf
+        }
+        # Bristol app - decomposes multiallelic variants into biallelic variants
+        call vtDecompose.vtDecompose_v1_0 as vtDecompose_v1_0 {
+            input:
+                sample_name = sample.sample_name,
+                vcf = vtNormalize_v1_0.normalisedvcf
+        }
     }
 # THIS WORKS
-    if (length(GATK_CombineVariants.is_done) == length(samples)) {
+    if (length(vtDecompose_v1_0.is_done) == length(samples)) {
         call multiqc.multiqc_v1_15_0 as multiqc {
             input:
                 project_for_multiqc = project,
@@ -205,33 +189,31 @@ workflow DNA_pipeline {
         Array[File?] fastqc_1_stats = fastqc_v1_3_R1.stats_txt
         Array[File?] fastqc_2_html = fastqc_v1_3_R2.report_html
         Array[File?] fastqc_2_stats = fastqc_v1_3_R2.stats_txt
-        Array[File?] fastp_report = Fastp.fastp_report
-        Array[File?] fastp_json = Fastp.fastp_json
-        Array[File?] trimmed_fastq_R1 = Fastp.trimmed_fastq_R1
-        Array[File?] trimmed_fastq_R2 = Fastp.trimmed_fastq_R2
+        Array[File?] fastp_report = fastp_v1_0.fastp_report
+        Array[File?] fastp_json = fastp_v1_0.fastp_json
+        Array[File?] trimmed_fastq_R1 = fastp_v1_0.trimmed_fastq_R1
+        Array[File?] trimmed_fastq_R2 = fastp_v1_0.trimmed_fastq_R2
         Array[File?] precollapsed_bam = bwa_mem_v1_3.sorted_bam
         Array[File?] precollapsed_bam_index = bwa_mem_v1_3.sorted_bai
-        Array[File?] final_bam = UMICollapse.final_bam
-        Array[File?] final_bam_index = UMICollapse.final_bam_index
-        Array[Array[File?]] chanjo_raw_output = chanjo_sambamba.chanjo_raw_output
-        Array[Array[File?]] chanjo_yaml = chanjo_sambamba.chanjo_yaml
-        Array[Array[File?]] chanjo_output_to_report = chanjo_sambamba.chanjo_output_to_report
+        Array[File?] final_bam = UMICollapse_v1_0.final_bam
+        Array[File?] final_bam_index = UMICollapse_v1_0.final_bam_index
+        Array[Array[File]+] verifybamid_out = verify_bam_id_v1_1_1.verifybamid_out
+        Array[Array[File?]] chanjo_raw_output = chanjo_sambamba_coverage_v1_13.chanjo_raw_output
+        Array[Array[File?]] chanjo_yaml = chanjo_sambamba_coverage_v1_13.chanjo_yaml
+        Array[Array[File?]] chanjo_output_to_report = chanjo_sambamba_coverage_v1_13.chanjo_output_to_report
         Array[Array[File?]] moka_picard_stats = moka_picard_v1_2.moka_picard_stats
-        Array[File?] vardict_raw_vcf = varDict.vardictVcf
-        Array[File?] mutect2_raw_vcf = mutect2.vcf
-        Array[File?] mutect2_bam = mutect2.bam
-        Array[File?] mutect2_bai = mutect2.bai
-        Array[File?] mutect2_stats = mutect2.stats
-        Array[File?] mutect2_filtered_vcf = mutect2_FilterCalls.vcf
-#        Array[Array[File?]] cnvkit_output = cnvkit_parabricks.cnvkit_output
-        Array[File?] msisensor_report = MsiSensor2.output_report
-        Array[File?] msisensor_report_dis = MsiSensor2.output_report_dis
-        Array[File?] msisensor_report_somatic = MsiSensor2.output_report_somatic
-        Array[File?] combined_vcf = GATK_CombineVariants.combined_vcf
-#        Array[File?] normalised_vcf = norm.normalisedvcf
-#        Array[File?] normalised_decomposed_vcf = decomp.decomposedvcf
-#        Array[File?] filtered_vcf = filter_variants.softfiltered_vcf
-#        Array[File?] filter_with_bedfile_vcf = filter_with_bedfile.filtered_vcf
+        Array[File?] vardict_raw_vcf = VarDict_v1_0.vardictVcf
+        Array[File?] mutect2_raw_vcf = Mutect2_v1_0.vcf
+        Array[File?] mutect2_bam = Mutect2_v1_0.bam
+        Array[File?] mutect2_bai = Mutect2_v1_0.bai
+        Array[File?] mutect2_stats = Mutect2_v1_0.stats
+        Array[File?] mutect2_filtered_vcf = GATK_FilterCalls_v1_0.vcf
+        Array[File?] msisensor_report = MsiSensor2_v1_0.output_report
+        Array[File?] msisensor_report_dis = MsiSensor2_v1_0.output_report_dis
+        Array[File?] msisensor_report_somatic = MsiSensor2_v1_0.output_report_somatic
+        Array[File?] combined_vcf = GATK_CombineVCFs_v1_0.combined_vcf
+        Array[File?] normalised_vcf = vtNormalize_v1_0.normalisedvcf
+        Array[File?] normalised_decomposed_vcf = vtDecompose_v1_0.decomposedvcf
         Array[File]+? multiqc_output_file = multiqc.multiqc
         File? multiqc_report = multiqc.multiqc_report
     }

@@ -1,6 +1,6 @@
 version 1.0
 
-task CombineVcfs {
+task GATK_CombineVCFs_v1_0 {
     input {
         String sample_name
         File? vardict_vcf
@@ -8,6 +8,17 @@ task CombineVcfs {
         File reference
         String javaXmx = "4G"
         Int threads = 2
+    }
+    meta {
+        title: "GATK_CombineVCFs_v1_0"
+        summary: "ADD HEADLINE SUMMARY HERE"
+        description: "ADD LONGER DESCRIPTION HERE"
+        tags: ["TSO500", "WDL"]
+        properties: {
+                        runtime_docker_image: "broadinstitute/gatk3:3.8-1",
+                        applet_version: "v1.0",
+                        release_status: "unreleased"
+                    }
     }
     Int disk_gb = ceil((2*size(mutect_vcf, "GiB")) + 4 + 10)
     command <<<
@@ -31,6 +42,7 @@ task CombineVcfs {
         Boolean is_done = true
     }
     runtime {
+        # Need to make my own dockerfile for this
         docker: "broadinstitute/gatk3:3.8-1"
         memory: "8 GB"
         cpu: 4
