@@ -17,7 +17,7 @@ task vtNormalize_v1_0 {
                         release_status: "unreleased"
                     }
     }
-    Int disk_gb = ceil(size(vcf, "GiB")+ 4 + 10)
+    Int disk_gb = ceil(size(vcf, "GiB") + 4 + 10)
     command <<<
         mkdir genome
         tar zxf ~{reference} -C genome

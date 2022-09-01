@@ -5,7 +5,6 @@ task UMICollapse_v1_0 {
         File? precollapsed_bam
         File? precollapsed_bam_index
         String sample_name
-        Int? min_disk_gb = 10
     }
     meta {
         title: "UMICollapse_v1_0"
@@ -18,7 +17,7 @@ task UMICollapse_v1_0 {
             release_status: "unreleased"
             }
         }
-    Int disk_gb = select_first([(ceil(2*size(precollapsed_bam, "GiB")) + 20), min_disk_gb])
+    Int disk_gb = ceil((2*size(precollapsed_bam, "GiB")) + 10)
     command <<<
         set -x
         /umicollapse bam \

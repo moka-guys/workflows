@@ -48,13 +48,11 @@ workflow TSO500_workflow {
         }
 
     scatter (sample in samples) {
-
         # FASTQC
         call fastqc.fastqc_v1_3 as fastqc_v1_3_R1 {
             input:
             reads = sample.fastq_file_1
         }
-
         call fastqc.fastqc_v1_3 as fastqc_v1_3_R2 {
             input:
             reads = sample.fastq_file_2
@@ -89,29 +87,6 @@ workflow TSO500_workflow {
             precollapsed_bam = bwa_mem_v1_3.sorted_bam,
             precollapsed_bam_index = bwa_mem_v1_3.sorted_bai
         }
-        # VerifyBamID - contamination detection
-        call verify_bam_id.verify_bam_id_v1_1_1 as verify_bam_id_v1_1_1 {
-            input:
-                input_bam = UMICollapse_v1_0.final_bam,
-                input_bam_index = UMICollapse_v1_0.final_bam_index
-        }
-        # calculate exon-level and gene-level coverage
-        call chanjo_sambamba.chanjo_sambamba_coverage_v1_13 as chanjo_sambamba_coverage_v1_13 {
-            input:
-            coverage_level = sambamba_coverage_level,
-            sambamba_bed = coverage_bedfile,
-            bamfile = UMICollapse_v1_0.final_bam,
-            bam_index = UMICollapse_v1_0.final_bam_index
-        }
-        # QC stats
-        call moka_picard.moka_picard_v1_2 as moka_picard_v1_2 {
-            input:
-            sorted_bam = UMICollapse_v1_0.final_bam,
-            fasta_index = reference_fasta_index,
-            vendor_exome_bedfile = bedfile,
-            Capture_panel = Capture_panel,
-            remove_chr = remove_chr
-        }
         # Bristol app - ours is an old outdated version of vardict
         call vardict.VarDict_v1_0 as VarDict_v1_0 {
             input:
@@ -142,16 +117,6 @@ workflow TSO500_workflow {
                 unfiltered_vcf = Mutect2_v1_0.vcf,
                 stats = Mutect2_v1_0.stats
         }
-        # Bristol app - MSI Sensor 2 - CPU based
-        call msisensor2.MsiSensor2_v1_0 as MsiSensor2_v1_0 {
-            input:
-                input_bam = UMICollapse_v1_0.final_bam,
-                input_bam_index = UMICollapse_v1_0.final_bam_index,
-                model = MSI_model,
-                coverage_threshold = MSI_coverage_threshold,
-                microsatellite_only = MSI_microsatellite_only,
-                sample_name = sample.sample_name
-        }
         # Bristol app - combines vcfs from vardict and mutect2
         call GATK_combine_vcfs.GATK_CombineVCFs_v1_0 as GATK_CombineVCFs_v1_0 {
             input:
@@ -173,6 +138,39 @@ workflow TSO500_workflow {
             input:
                 sample_name = sample.sample_name,
                 vcf = vtNormalize_v1_0.normalisedvcf
+        }
+        # Bristol app - MSI Sensor 2 - CPU based
+        call msisensor2.MsiSensor2_v1_0 as MsiSensor2_v1_0 {
+            input:
+                input_bam = UMICollapse_v1_0.final_bam,
+                input_bam_index = UMICollapse_v1_0.final_bam_index,
+                model = MSI_model,
+                coverage_threshold = MSI_coverage_threshold,
+                microsatellite_only = MSI_microsatellite_only,
+                sample_name = sample.sample_name
+        }
+        # VerifyBamID - contamination detection
+        call verify_bam_id.verify_bam_id_v1_1_1 as verify_bam_id_v1_1_1 {
+            input:
+                input_bam = UMICollapse_v1_0.final_bam,
+                input_bam_index = UMICollapse_v1_0.final_bam_index
+        }
+        # calculate exon-level and gene-level coverage
+        call chanjo_sambamba.chanjo_sambamba_coverage_v1_13 as chanjo_sambamba_coverage_v1_13 {
+            input:
+            coverage_level = sambamba_coverage_level,
+            sambamba_bed = coverage_bedfile,
+            bamfile = UMICollapse_v1_0.final_bam,
+            bam_index = UMICollapse_v1_0.final_bam_index
+        }
+        # QC stats
+        call moka_picard.moka_picard_v1_2 as moka_picard_v1_2 {
+            input:
+            sorted_bam = UMICollapse_v1_0.final_bam,
+            fasta_index = reference_fasta_index,
+            vendor_exome_bedfile = bedfile,
+            Capture_panel = Capture_panel,
+            remove_chr = remove_chr
         }
     }
 # THIS WORKS

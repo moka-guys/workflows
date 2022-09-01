@@ -1,0 +1,11 @@
+{
+    "fastqc": ["/QC", "stats-fastqc", "in"],
+    "fastp": ["/output", "^[^.]+\\.((metrics.fastp)|(trimmed.R(1|2).fastq.gz))(.+$|)", "regex"],
+    "bam": ["/output", ".bam", "in"],
+    "bai": ["/output", ".bai", "in"],
+    "coverage": ["/coverage", "^[^.]+(\\.final\\.)(gene_level|exon_level|chanjo_txt|sambamba_output)(.+$|)", "regex"],
+    "msisensor2": ["/output", "tumor", "in"],
+    "vcf": ["/output", "vcf", "in"],
+    "verifybamID": ["/QC", "^[^.]+(\\.final\\.)(([a-zA-Z])+(SM)|log)$", "regex"],
+    "picard": ["/QC", "^[^.]+(\\.final\\.)(alignment|base|insert|quality|pertarget|hsmetrics).+$", "regex"]
+}

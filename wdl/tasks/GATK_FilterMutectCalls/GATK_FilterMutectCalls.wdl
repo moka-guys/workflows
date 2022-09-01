@@ -36,7 +36,7 @@ task GATK_FilterCalls_v1_0{
         File? vcf = "~{sample_name}_mutect2_filt.vcf"
     }
     runtime {
-        # Need to make my own dockerfile for this
+        # build from existing dockerfile and switch to using this
         docker: "swglh/gatk:4.2.0.0"
         memory: "8 GB"
         cpu: 4

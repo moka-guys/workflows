@@ -24,7 +24,7 @@ task VarDict_v1_0 {
             release_status: "unreleased"
             }
     }
-    Int disk_gb = ceil(size(tumorBam, "GiB")+ size(reference, "GiB") + 20)
+    Int disk_gb = ceil(size(tumorBam, "GiB")+ size(reference, "GiB") + 10)
     command <<<
         set -x
         touch ~{tumorBamIndex}

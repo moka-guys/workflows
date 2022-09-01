@@ -5,7 +5,6 @@ task fastp_v1_0 {
         String sample_name
         String output_dir
         Array[File] fastq_files
-        Int? min_disk_gb = 10
     }
     meta {
         title: "fastp_v1_0"
@@ -18,10 +17,9 @@ task fastp_v1_0 {
             release_status: "unreleased"
             }
     }
-    Int disk_gb = select_first([(ceil(2*size(fastq_files, "GiB")) + 20), min_disk_gb])
+    Int disk_gb = ceil((2*size(fastq_files, "GiB")) + 10)
     command <<<
         set -x
-        mkdir -p ~{output_dir}/Metrics &&
         /fastp \
         -i ~{fastq_files[0]} \
         -I ~{fastq_files[1]} \

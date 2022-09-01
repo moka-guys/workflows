@@ -7,5 +7,9 @@
           "allProjects": "VIEW"
         }
       }
+  },
+    "custom-reorg" : {
+      "app_id" : "applet-GG8BkPj0PXf737BP9gqggVpj",
+      "conf" : "dx://file-GG7bZp00PXf1bbpB7PgxYjvv"
   }
 }
