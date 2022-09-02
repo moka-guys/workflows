@@ -83,9 +83,9 @@ workflow TSO500_workflow {
         # Bristol app - UMICOLLAPSE - alignment collapse by UMI
         call umi_collapse.UMICollapse_v1_0 as UMICollapse_v1_0 {
             input:
-            sample_name = sample.sample_name,
+            sample_name = fastp_v1_0.filename_stem,
             precollapsed_bam = bwa_mem_v1_3.sorted_bam,
-            precollapsed_bam_index = bwa_mem_v1_3.sorted_bai
+            precollapsed_bam_index = bwa_mem_v1_3.sorted_bai,
         }
         # Bristol app - ours is an old outdated version of vardict
         call vardict.VarDict_v1_0 as VarDict_v1_0 {
@@ -110,7 +110,7 @@ workflow TSO500_workflow {
         # Bristol app
         call GATK_FilterMutectCalls.GATK_FilterCalls_v1_0 as GATK_FilterCalls_v1_0 {
             input:
-                sample_name = sample.sample_name,
+                sample_name = Mutect2_v1_0.filename_stem,
                 output_dir = sample.output_dir,
                 reference = reference_fasta_index,
                 intervals = bedfile,
@@ -129,14 +129,14 @@ workflow TSO500_workflow {
         # changed; in such cases, the normalized variants are reordered and output in an ordered fashion
         call vtNormalize.vtNormalize_v1_0 as vtNormalize_v1_0 {
             input:
-                sample_name = sample.sample_name,
+                sample_name = GATK_CombineVCFs_v1_0.filename_stem,
                 reference = reference_fasta_index,
                 vcf = GATK_CombineVCFs_v1_0.combined_vcf
         }
         # Bristol app - decomposes multiallelic variants into biallelic variants
         call vtDecompose.vtDecompose_v1_0 as vtDecompose_v1_0 {
             input:
-                sample_name = sample.sample_name,
+                sample_name = vtNormalize_v1_0.filename_stem,
                 vcf = vtNormalize_v1_0.normalisedvcf
         }
         # Bristol app - MSI Sensor 2 - CPU based

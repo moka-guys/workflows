@@ -29,11 +29,11 @@ task GATK_FilterCalls_v1_0{
         --stats ~{stats} \
         --max-events-in-region 15 \
         -V ~{unfiltered_vcf} \
-        -O ~{sample_name}_mutect2_filt.vcf
+        -O ~{sample_name}.filt.vcf
         true
     >>>
     output {
-        File? vcf = "~{sample_name}_mutect2_filt.vcf"
+        File? vcf = "~{sample_name}.filt.vcf"
     }
     runtime {
         # build from existing dockerfile and switch to using this

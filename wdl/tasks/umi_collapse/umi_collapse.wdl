@@ -23,13 +23,13 @@ task UMICollapse_v1_0 {
         /umicollapse bam \
         --two-pass \
         -i ~{precollapsed_bam} \
-        -o ~{sample_name}.final.bam &&
-        samtools index ~{sample_name}.final.bam
+        -o ~{sample_name}.collapsed.bam &&
+        samtools index ~{sample_name}.collapsed.bam
         true
     >>>
     output {
-        File? final_bam = "${sample_name}.final.bam"
-        File? final_bam_index = "${sample_name}.final.bam.bai"
+        File? final_bam = "${sample_name}.collapsed.bam"
+        File? final_bam_index = "${sample_name}.collapsed.bam.bai"
     }
     runtime {
         # build from existing dockerfile and switch to using this

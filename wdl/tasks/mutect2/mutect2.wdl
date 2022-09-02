@@ -33,15 +33,17 @@ task Mutect2_v1_0 {
         --disable-read-filter MateOnSameContigOrNoMappedMateReadFilter \
         -L ~{intervals} \
         --interval-padding 50 \
-        -O ~{sample_name}_mutect2.vcf \
-        -bamout ~{sample_name}_m2.bam
+        -O ~{sample_name}.mutect2.vcf \
+        -bamout ~{sample_name}.mutect2.bam
         true
     >>>
     output {
-        File? vcf = "~{sample_name}_mutect2.vcf"
-        File? bam = "~{sample_name}_m2.bam"
-        File? bai = "~{sample_name}_m2.bai"
-        File? stats= "~{sample_name}_mutect2.vcf.stats"
+        File? vcf = "~{sample_name}.mutect2.vcf"
+        File? bam = "~{sample_name}.mutect2.bam"
+        File? bai = "~{sample_name}.mutect2.bai"
+        File? stats= "~{sample_name}.mutect2.vcf.stats"
+        String filename_stem = "${sample_name}.mutect2"
+
     }
     runtime {
         # Need to make my own dockerfile for this

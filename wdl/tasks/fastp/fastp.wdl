@@ -41,6 +41,7 @@ task fastp_v1_0 {
         File? fastp_json = "${sample_name}.metrics.fastp.json"
         File? trimmed_fastq_R1 = "${sample_name}.trimmed.R1.fastq.gz"
         File? trimmed_fastq_R2 = "${sample_name}.trimmed.R2.fastq.gz"
+        String filename_stem = "${sample_name}.trimmed"
     }
     runtime {
         # build from existing dockerfile and switch to using this

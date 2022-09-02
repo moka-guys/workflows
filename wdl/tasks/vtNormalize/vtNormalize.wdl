@@ -31,6 +31,7 @@ task vtNormalize_v1_0 {
     >>>
     output {
         File? normalisedvcf = "~{sample_name}.normalised.vcf"
+        String filename_stem = "${sample_name}.normalised"
     }
     runtime {
         # build from existing dockerfile and switch to using this

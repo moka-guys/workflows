@@ -39,6 +39,7 @@ task GATK_CombineVCFs_v1_0 {
     >>>
     output {
         File? combined_vcf = "${sample_name}.combined.vcf"
+        String filename_stem = "${sample_name}.combined"
         Boolean is_done = true
     }
     runtime {
