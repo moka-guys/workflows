@@ -1,11 +1,12 @@
 {
     "fastqc": ["/QC", "stats-fastqc", "in"],
-    "fastp": ["/output", "^[^.]+\\.((metrics.fastp)|(trimmed.R(1|2).fastq.gz))(.+$|)", "regex"],
-    "bam": ["/output", ".bam", "in"],
-    "bai": ["/output", ".bai", "in"],
-    "coverage": ["/coverage", "^[^.]+(\\.final\\.)(gene_level|exon_level|chanjo_txt|sambamba_output)(.+$|)", "regex"],
+    "fastp": ["/output", "^[^.]+\\.(?:trimmed\\.R[12]\\.fastq\\.gz|metrics\\.fastp\\.(?:html|json))$", "regex"],
+    "bam": ["/output", ".bam", "end"],
+    "bai": ["/output", ".bai", "end"],
+    "coverage": ["/coverage", "^[^.]+\\.trimmed\\.collapsed\\.(?:sambamba_output\\.bed|chanjo(?:(?:_out_json|\\.yaml)|_txt)|exon_level\\.txt|gene_level\\.txt)$", "regex"],
     "msisensor2": ["/output", "tumor", "in"],
     "vcf": ["/output", "vcf", "in"],
-    "verifybamID": ["/QC", "^[^.]+(\\.final\\.)(([a-zA-Z])+(SM)|log)$", "regex"],
-    "picard": ["/QC", "^[^.]+(\\.final\\.)(alignment|base|insert|quality|pertarget|hsmetrics).+$", "regex"]
+    "verifybamID": ["/QC", "^[^.]+\\.trimmed\\.collapsed\\.(?:depthSM|selfSM|log)$", "regex"],
+    "picard": ["/QC", "^[^.]+\\.trimmed\\.collapsed\\.(?:base_distribution_by_cycle(?:_metrics|\\.pdf)|quality_distribution(?:_metrics|\\.pdf)|insert_size_histogram\\.pdf|alignment_summary_metrics|quality_by_cycle(?:_metrics|\\.pdf)|(?:pertarget_coverage|hsmetrics)\\.tsv|insert_size_metrics)$", "regex"],
+    "multiqc": ["/QC", "^.*multiqc.*$", "regex"]
 }

@@ -23,6 +23,13 @@
   ],
   "outputSpec": [
     {
+      "name": "logfile",
+      "label": "Logfile",
+      "help": "Log file detailing actions taken by the app.",
+      "class": "file",
+      "patterns": ["custom_reorg_*.log"]
+    },
+    {
       "name": "outputs",
       "label": "Outputs",
       "help": "",
@@ -38,16 +45,16 @@
     }
   ],
   "runSpec": {
+    "distribution": "Ubuntu",
+    "release": "20.04",
     "version": "0",
     "interpreter": "python3",
+    "file": "src/code.py",
     "timeoutPolicy": {
       "*": {
         "hours": 4
       }
-    },
-    "distribution": "Ubuntu",
-    "release": "20.04",
-    "file": "src/code.py"
+    }
   },
   "access": {
     "network": [
