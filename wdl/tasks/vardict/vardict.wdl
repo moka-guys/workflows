@@ -1,11 +1,10 @@
-version 1.0
+version 1.1
 
 task VarDict_v1_0 {
     input {
         String sampleName
-        String output_dir
-        File? tumorBam
-        File? tumorBamIndex
+        File tumorBam
+        File tumorBamIndex
         File reference
         File bedFile
         Int chromosomeColumn = 1
@@ -24,9 +23,9 @@ task VarDict_v1_0 {
             release_status: "unreleased"
             }
     }
-    Int disk_gb = ceil(size(tumorBam, "GiB")+ size(reference, "GiB") + 10)
+    Int disk_gb = select_first([ceil(size(tumorBam, "GiB") + size(reference, "GiB") + 10), 10])
     command <<<
-        set -x
+        set -exo pipefail
         touch ~{tumorBamIndex}
         mkdir genome
         tar zxf ~{reference} -C genome
@@ -44,17 +43,15 @@ task VarDict_v1_0 {
         teststrandbias.R | \
         var2vcf_valid.pl -N ~{sampleName} \
         > ~{sampleName}.vardictsingle.vcf
-        true
         >>>
     output {
-        File? vardictVcf = "${sampleName}.vardictsingle.vcf"
+        File vardictVcf = "${sampleName}.vardictsingle.vcf"
     }
     runtime {
-        # build from existing dockerfile and switch to using this
-        docker: "swglh/vardictjava:1.8"
+        docker: "dx://project-G76q9bQ0PXfP7q972fVf2X19:file-GKv3xZ00PXf7v3xk8gY0f4Xj"
         memory: "4 GB"
         cpu: 8
+        dx_instance_type: "mem1_ssd1_x8"
         disks: "local-disk ${disk_gb} SSD"
-        continueOnReturnCode: true
     }
 }

@@ -1,9 +1,9 @@
-version 1.0
+version 1.1
 
 task UMICollapse_v1_0 {
     input {
-        File? precollapsed_bam
-        File? precollapsed_bam_index
+        File precollapsed_bam
+        File precollapsed_bam_index
         String sample_name
     }
     meta {
@@ -17,26 +17,24 @@ task UMICollapse_v1_0 {
             release_status: "unreleased"
             }
         }
-    Int disk_gb = ceil((2*size(precollapsed_bam, "GiB")) + 10)
     command <<<
-        set -x
-        /umicollapse bam \
+        set -exo pipefail
+        /bin/bash /umicollapse bam \
         --two-pass \
         -i ~{precollapsed_bam} \
         -o ~{sample_name}.collapsed.bam &&
         samtools index ~{sample_name}.collapsed.bam
-        true
     >>>
     output {
-        File? final_bam = "${sample_name}.collapsed.bam"
-        File? final_bam_index = "${sample_name}.collapsed.bam.bai"
+        File final_bam = "${sample_name}.collapsed.bam"
+        File final_bam_index = "${sample_name}.collapsed.bam.bai"
+        String filename_stem = "${sample_name}.collapsed"
     }
     runtime {
-        # build from existing dockerfile and switch to using this
-        docker: "mattwherlock/umicollapse-samtools-reorg:latest"
+        docker: "dx://project-G76q9bQ0PXfP7q972fVf2X19:file-GKvF1p80PXfF03ZYBPb6xjj2"
         memory: "32 GB"
         cpu: 4
-        disks: "local-disk ${disk_gb} SSD"
-        continueOnReturnCode: true
+        dx_instance_type: "mem3_ssd1_v2_x4"
+        disks: "local-disk ~{ceil((2*size(precollapsed_bam, "GiB")) + 10)} SSD"
     }
 }

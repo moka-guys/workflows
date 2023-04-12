@@ -1,13 +1,13 @@
-version 1.0
+version 1.1
 
 task MsiSensor2_v1_0 {
     input {
-        File? input_bam
-        File? input_bam_index
+        File input_bam
+        File input_bam_index
         String model
-        Int? coverage_threshold
-        Boolean? homopolymer_only = false
-        Boolean? microsatellite_only = false
+        Int coverage_threshold
+        Boolean homopolymer_only = false
+        Boolean microsatellite_only = false
         String sample_name
     }
     parameter_meta {
@@ -33,6 +33,7 @@ task MsiSensor2_v1_0 {
     }
     String output_file = '~{sample_name}.tumor.prefix'
     command <<<
+        set -exo pipefail
         ls ~{input_bam_index}
         set -x
         if [ ~{homopolymer_only} = true ] ; then
@@ -54,17 +55,14 @@ task MsiSensor2_v1_0 {
             -x ${homopolymer_parameter} \
             -y ${microsatelite_parameter} \
             -o ~{output_file}
-            true
     >>>
     output {
-        File? output_report = "${output_file}"
-        File? output_report_dis = "${output_file}_dis"
-        File? output_report_somatic = "${output_file}_somatic"
+        File output_report = "${output_file}"
+        File output_report_dis = "${output_file}_dis"
+        File output_report_somatic = "${output_file}_somatic"
     }
     runtime {
-        # build from existing dockerfile and switch to using this
-        docker: "dx://file-G60XzGj0jy5vbvjk9pV0kFKv"
+        docker: "dx://project-G76q9bQ0PXfP7q972fVf2X19:file-GK90BxQ0PXf8kbqk4bYV1V0x"
         dx_instance_type: "mem2_ssd1_v2_x16"
-        continueOnReturnCode: true
     }
 }

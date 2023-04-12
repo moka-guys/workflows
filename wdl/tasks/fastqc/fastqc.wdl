@@ -1,38 +1,39 @@
-version 1.0
+version 1.1
 
-task fastqc_v1_3 {
+task fastqc_v1_4_0 {
     input {
+        Array[File]+ reads
+        File? contaminants_txt
+        File? adapters_txt
+        File? limits_txt
         String? format
         Int? kmer_size
-        File? adapters_txt
         Boolean? nogroup
-        File? limits_txt
-        File reads
-        File? contaminants_txt
         String? extra_options
     }
     meta {
-        title: "fastqc_v1_3"
+        title: "fastqc_v1_4_0"
         summary: "ADD HEADLINE SUMMARY HERE"
         description: "ADD LONGER DESCRIPTION HERE"
         tags: ["TSO500", "WDL"]
         properties: {
-                        runtime_applet: "applet-FBPFfkj0jy1Q114YGQ0yQX8Y",
-                        version: "v1.3",
+                        runtime_applet: "applet-GKXqZV80jy1QxF4yKYB4Y3Kz",
+                        version: "v1.4.0",
                         release_status: "released"
                     }
     }
     command <<< >>>
     output {
-        File report_html = "placeholder.txt"
-        File stats_txt = "placeholder.txt"
+        Array[File]+ report_html = ["placeholder.txt"]
+        Array[File]+ stats_txt = ["placeholder.txt"]
     }
     runtime {
         # Eventually switch from using DNAnexus applet
         dx_app: object {
                     type: "applet",
-                    id: "applet-FBPFfkj0jy1Q114YGQ0yQX8Y",
-                    name: "fastqc_v1.3"
+                    project: "project-ByfFPz00jy1fk6PjpZ95F27J",
+                    id: "applet-GKXqZV80jy1QxF4yKYB4Y3Kz",
+                    name: "fastqc_v1.4.0"
                 }
     }
 }

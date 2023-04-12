@@ -2,9 +2,9 @@ FROM ubuntu:20.04
 
 ENV DEBIAN_FRONTEND noninteractive
 
-RUN apt-get update -y\
+RUN apt-get update -y \
     && apt-get install -y git libnss-sss curl less vim unzip  \
-    build-essential libz-dev libbz2-dev liblzma-dev libcurl4-openssl-dev libssl-dev
+    build-essential libz-dev libbz2-dev liblzma-dev libcurl4-openssl-dev libssl-dev tabix=1.10.2-3
 
 # Download/install vt
 RUN mkdir vt \

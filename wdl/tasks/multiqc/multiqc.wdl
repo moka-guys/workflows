@@ -1,4 +1,4 @@
-version 1.0
+version 1.1
 
 task multiqc_v1_15_0 {
     input {
@@ -23,8 +23,10 @@ task multiqc_v1_15_0 {
     }
     runtime {
         # Eventually switch from using DNAnexus applet
-        dx_app: object {
+        dx_app: 
+            object {
                     type: "applet",
+                    project: "project-ByfFPz00jy1fk6PjpZ95F27J",
                     id: "applet-G7QB6zj0jy1z1ZV1P5VZBj9p",
                     name: "multiqc_v1.15.0"
                 }

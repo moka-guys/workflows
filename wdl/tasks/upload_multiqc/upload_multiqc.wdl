@@ -1,35 +1,33 @@
 version 1.1
 
-task moka_picard_v1_2 {
+task upload_multiqc_v1_4_0 {
     input {
-        File sorted_bam
-        File fasta_index
-        File vendor_exome_bedfile
-        Boolean remove_chr
-        String Capture_panel
+        File multiqc_html
+        Array[File]+ multiqc_data_input
+        Boolean upload_data_files = true
     }
     meta {
-        title: "moka_picard_v1_2"
+        title: "upload_multiqc_v1_4_0"
         summary: "ADD HEADLINE SUMMARY HERE"
         description: "ADD LONGER DESCRIPTION HERE"
         tags: ["TSO500", "WDL"]
         properties: {
-                        runtime_applet: "applet-G9yJ57j0jy1ZV0fxPZZXJ8FJ",
-                        version: "v1.2",
+                        runtime_applet: "applet-G2XY8QQ0p7kzvPZBJGFygP6f",
+                        version: "v1.4.0",
                         release_status: "released"
                     }
     }
     command <<< >>>
     output {
-        Array[File]+ moka_picard_stats = ["placeholder.txt"]
+        Array[File]+ upload_multiqc = ["placeholder.txt"]
     }
     runtime {
         # Eventually switch from using DNAnexus applet
         dx_app: object {
                     type: "applet",
                     project: "project-ByfFPz00jy1fk6PjpZ95F27J",
-                    id: "applet-G9yJ57j0jy1ZV0fxPZZXJ8FJ",
-                    name: "moka_picard_v1.2"
+                    id: "applet-G2XY8QQ0p7kzvPZBJGFygP6f",
+                    name: "upload_multiqc_v1.4.0"
                 }
     }
 }

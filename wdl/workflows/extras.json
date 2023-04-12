@@ -1,0 +1,11 @@
+{
+  "defaultTaskDxAttributes" : {
+    "runSpec": {
+        "access" : {
+          "network": ["*"],
+          "project": "CONTRIBUTE",
+          "allProjects": "UPLOAD"
+        }
+      }
+  }
+}

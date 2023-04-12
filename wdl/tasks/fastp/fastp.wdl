@@ -1,10 +1,10 @@
-version 1.0
+version 1.1
 
 task fastp_v1_0 {
     input {
         String sample_name
-        String output_dir
-        Array[File] fastq_files
+        File fastq_file_1
+        File fastq_file_2
     }
     meta {
         title: "fastp_v1_0"
@@ -17,12 +17,11 @@ task fastp_v1_0 {
             release_status: "unreleased"
             }
     }
-    Int disk_gb = ceil((2*size(fastq_files, "GiB")) + 10)
     command <<<
-        set -x
+        set -exo pipefail
         /fastp \
-        -i ~{fastq_files[0]} \
-        -I ~{fastq_files[1]} \
+        -i ~{fastq_file_1} \
+        -I ~{fastq_file_2} \
         -o ~{sample_name}.trimmed.R1.fastq.gz \
         -O ~{sample_name}.trimmed.R2.fastq.gz \
         --adapter_sequence AGATCGGAAGAGCACACGTCTGAACTCCAGTCA \
@@ -34,21 +33,19 @@ task fastp_v1_0 {
         --umi_loc per_read \
         --umi_len 7 \
         --umi_skip 2
-        true
     >>>
     output {
-        File? fastp_report = "${sample_name}.metrics.fastp.html"
-        File? fastp_json = "${sample_name}.metrics.fastp.json"
-        File? trimmed_fastq_R1 = "${sample_name}.trimmed.R1.fastq.gz"
-        File? trimmed_fastq_R2 = "${sample_name}.trimmed.R2.fastq.gz"
+        File fastp_report = "${sample_name}.metrics.fastp.html"
+        File fastp_json = "${sample_name}.metrics.fastp.json"
+        File trimmed_fastq_R1 = "${sample_name}.trimmed.R1.fastq.gz"
+        File trimmed_fastq_R2 = "${sample_name}.trimmed.R2.fastq.gz"
         String filename_stem = "${sample_name}.trimmed"
     }
     runtime {
-        # build from existing dockerfile and switch to using this
-        docker: "swglh/fastp-tabix:0.21.0"
+        docker: "dx://project-G76q9bQ0PXfP7q972fVf2X19:file-GKybB700PXfPfv3QGf3qQV34"
         memory: "4 GB"
         cpu: 2
-        disks: "local-disk ${disk_gb} SSD"
-        continueOnReturnCode: true
+        disks: "local-disk ~{ceil(2*size([fastq_file_1, fastq_file_2], "GiB")) + 10} SSD"
+        dx_instance_type: "mem1_ssd1_v2_x4"
     }
 }

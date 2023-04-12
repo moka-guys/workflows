@@ -1,0 +1,14 @@
+{
+  "stage-common.project_name": "003_211230_tso500_nexus_pipeline_development",
+  "stage-common.samples": [
+    {
+      "sample_name": "TSO5_03_EK6195_NA_UP03_S3",
+      "fastq_file_1": "003_211230_tso500_nexus_pipeline_development:test_data/test_samples/TSO5_03_EK6195_NA_UP03_S3_R1_001.fastq.gz",
+      "fastq_file_2": "003_211230_tso500_nexus_pipeline_development:test_data/test_samples/TSO5_03_EK6195_NA_UP03_S3_R2_001.fastq.gz"
+    }
+  ],
+  "stage-common.bedfile": "project-ByfFPz00jy1fk6PjpZ95F27J:file-GBVPpbQ0jy1QX34V5ypZP5kg",
+  "stage-common.coverage_bedfile": "project-ByfFPz00jy1fk6PjpZ95F27J:file-GBVPpbj0jy1ZZpy43Qf410G7",
+  "stage-common.sambamba_coverage_level": "100",
+  "stage-common.runtype": "TSO500"
+}
